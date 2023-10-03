@@ -5,10 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { buildSearchQuery } from 'src/common/helpers/build-search-query';
+import { exclude } from 'src/common/helpers/exclude';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     return this.userRepository.save(createUserDto);
@@ -26,11 +29,15 @@ export class UserService {
       skip,
     });
 
+    const usersWithoutPassword = users.map((user) => {
+      return exclude<User, 'password'>(user, ['password']);
+    });
+
     const total = users.length;
     const pages = Math.ceil(total / limit) || 1;
 
     return {
-      users,
+      users: usersWithoutPassword,
       total,
       page,
       pages,
@@ -39,11 +46,13 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    return this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         id,
       },
     });
+
+    return exclude<User, 'password'>(user, ['password']);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

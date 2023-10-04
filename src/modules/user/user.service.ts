@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +11,7 @@ import { exclude } from 'src/common/helpers/exclude';
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
     return this.userRepository.save(createUserDto);
@@ -51,6 +51,8 @@ export class UserService {
         id,
       },
     });
+
+    if (!user) throw new NotFoundException('User not found');
 
     return exclude<User, 'password'>(user, ['password']);
   }

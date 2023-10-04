@@ -11,9 +11,10 @@ import { Auth } from '@/common/decorator/auth.decorator';
 
 @Controller('/api/v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('sign-up')
+  @Auth(AuthType.Public)
   async signUp(
     @Body()
     signUpDto: SignUpDto,
@@ -22,6 +23,7 @@ export class AuthController {
   }
 
   @Post('sign-in')
+  @Auth(AuthType.Public)
   async signIn(
     @Body()
     signInDto: SignInDto,

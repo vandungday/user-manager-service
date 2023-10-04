@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,11 @@ async function bootstrap() {
   });
   app.useGlobalPipes(validationPipe);
 
-  await app.listen(3001, () => console.log('Server is running on port 3001'));
+  const configService = app.get(ConfigService);
+  const port = configService.get('port');
+
+  app.enableCors();
+
+  await app.listen(port, () => console.log(`Server is running on port ${port}`));
 }
 bootstrap();
